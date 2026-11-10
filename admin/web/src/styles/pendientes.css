@@ -1,0 +1,90 @@
+/* «Te espera» en celu/tablet (≤1024): una sola señal, la tarjeta abierta y compacta, el chat visible arriba.
+   Va aparte de chat.css (se importa después y pisa lo de ahí). */
+@media (max-width: 1024px) {
+  /* En el chat, el pendiente ya está pegado arriba de la caja: la pastilla «esperando tu respuesta…» queda solo para
+     lectores de pantalla (que siguen el chat en orden), no como segundo aviso visual. */
+  .msg-herramienta:has(> .msg-fijado) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* la columna no crece con el texto largo del botón (se salía de pantalla: 871 px en 390) */
+  .pend-movil {
+    grid-template-columns: minmax(0, 1fr);
+    overflow-x: hidden;
+  }
+
+  .pend-movil-boton,
+  .pend-movil-que {
+    min-width: 0;
+  }
+
+  .pend-movil-que {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pend-movil[data-abierto="true"] {
+    gap: var(--sp-2);
+    max-height: min(46dvh, 380px);
+  }
+
+  .pend-movil .btn,
+  .pend-movil-boton {
+    min-height: 44px;
+    padding: 8px 12px;
+  }
+
+  /* tarjeta compacta: sin caja dentro de la caja */
+  .pend-movil .tc-head {
+    padding: 8px 12px;
+  }
+
+  .pend-movil .tc-body {
+    padding: 8px 12px;
+  }
+
+  .pend-movil .tc-foot {
+    padding: 4px 12px 12px;
+  }
+
+  .pend-movil .wa-chat {
+    padding: 0;
+    background: none;
+  }
+
+  .pend-movil .wa-bubble {
+    max-width: 100%;
+  }
+
+  .pend-movil .tc-actions {
+    flex: 1 1 auto;
+  }
+
+  .pend-movil .tc-actions .tc-btn {
+    flex: 1 1 0;
+  }
+}
+
+/* Escritorio: el pendiente vive en la columna derecha; arriba de la caja, nunca (abierto o no). */
+@media (min-width: 1025px) {
+  .pend-movil,
+  .pend-movil[data-abierto="true"] {
+    display: none;
+  }
+}
+
+.call-bar {
+  position: relative;
+}
+
+.call-bar > .ir-final {
+  position: absolute;
+  right: 16px;
+  bottom: calc(100% + 8px);
+}

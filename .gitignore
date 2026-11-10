@@ -1,0 +1,28 @@
+.env
+.device.lock
+.venv/
+__pycache__/
+*.py[cod]
+*.log
+shots/
+*.roto
+*.bak
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+dist/
+build/
+
+# WhatsApp bridge
+whatsapp/bridge/whatsapp-bridge
+whatsapp/.env
+
+# capturas de revisión (datos reales)
+.impeccable/review/
+compose.override.yaml
+.env.*
+!.env.example
+
+# binarios del puente
+puente/dist/
+android/termux/known_hosts_np

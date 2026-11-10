@@ -1,0 +1,290 @@
+# no-phone completo en Docker: el secretario y todo lo que usa, en cualquier PC con Docker.
+#
+#   ./docker/instalar.sh            → crea .env con tokens nuevos y levanta todo
+#   http://127.0.0.1:8890           → consola (la primera vez pide crear tu usuario)
+#
+# Celu: por USB a esta PC (ADB_MODE=usb, por defecto) o por WiFi (ADB_MODE=connect + ADB_CONNECT).
+# Si el adb lo maneja otra máquina (VPS ↔ casa por tailnet): compose.adb-remoto.yaml. Ver DOCKER.md.
+#
+# Nada se publica fuera de 127.0.0.1. Todo lo demás habla por la red interna `no-phone`.
+name: no-phone
+
+x-app: &app
+  build: .
+  image: no-phone-app:latest
+  env_file: .env
+  restart: unless-stopped
+  volumes:
+    - app-data:/data
+  environment: &app-env
+    ADB_MODE: ${APP_ADB_MODE:-remote}   # VPS sin PC en casa: APP_ADB_MODE=apk (compose.vps.yaml)
+    ANDROID_ADB_SERVER_HOST: ${ANDROID_ADB_SERVER_HOST:-adb}
+    ANDROID_ADB_SERVER_PORT: ${ANDROID_ADB_SERVER_PORT:-5037}
+    WA_BRIDGE_URL: http://whatsapp:8801
+    WA_DATA_DIR: /wa/whatsapp
+    TZ: ${TZ:-America/Argentina/Mendoza}
+
+services:
+  # ---------- celular ----------
+  adb:
+    <<: *app
+    environment:
+      ADB_MODE: ${ADB_MODE:-usb}
+      ADB_CONNECT: ${ADB_CONNECT:-}
+    entrypoint: ["/usr/bin/tini", "--"]
+    command: ["/app/docker/adb-server.sh"]
+    # usb: los nodos /dev/bus/usb del host suelen ser de root; en el host no tiene que correr otro adb server.
+    user: "0:0"
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+    volumes:
+      - adb-keys:/root/.android
+    healthcheck:
+      test: ["CMD", "adb", "devices"]
+      interval: 30s
+      timeout: 10s
+
+  # ---------- app: API y conectores MCP (HTTP + token) ----------
+  nophone-api:
+    <<: *app
+    depends_on: [adb]
+    command: ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8800"]
+    environment:
+      <<: *app-env
+      WALLET_BOT_TOKEN: ${WALLET_BOT_TOKEN:?corré docker/instalar.sh}
+    ports:
+      - "127.0.0.1:${API_PORT:-8800}:8800"
+
+  nophone-mcp:
+    <<: *app
+    depends_on: [adb]
+    environment:
+      <<: *app-env
+      MCP_TRANSPORT: http
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: "8810"
+    command: ["python", "mcp_server.py"]
+
+  nophone-mcp-whatsapp:
+    <<: *app
+    depends_on: [whatsapp, stt]
+    environment:
+      <<: *app-env
+      STT_URL: http://stt:8820
+      # el bridge ve el mismo volumen wa-data en /data: así le pasamos rutas que pueda leer (adjuntos, comprobantes)
+      WA_BRIDGE_DATA_DIR: /data/whatsapp
+      MCP_TRANSPORT: http
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: "8811"
+      # el vigía también avisa el resultado de las tareas programadas de Hermes (solo lectura)
+      HERMES_CRON_DIR: /hermes/cron
+      # cancelaciones de vigilancias pedidas desde la consola (app-data, que la consola sí puede escribir)
+      WA_VIG_CANCELAR: /data/no-phone/vigilancias-cancelar.json
+    volumes:
+      - app-data:/data
+      - wa-data:/wa
+      - hermes-data:/hermes:ro
+    command: ["python", "whatsapp/mcp_server.py"]
+
+  nophone-mcp-movilidad:
+    <<: *app
+    environment:
+      <<: *app-env
+      MCP_TRANSPORT: http
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: "8812"
+    command: ["python", "mcp_movilidad.py"]
+
+  # Reglas de comportamiento (directivas de la memoria): lo que el dueño pide por chat cae en el mismo lugar que
+  # la consola → secretario → reglas. Sin celu ni archivos.
+  nophone-mcp-reglas:
+    <<: *app
+    environment:
+      <<: *app-env
+      MCP_TRANSPORT: http
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: "8813"
+      HINDSIGHT_URL: http://hindsight:8888
+      # el id del banco de memoria del secretario (el que elegiste en el setup de la consola)
+      HINDSIGHT_BANK: ${HINDSIGHT_BANK:-}
+    command: ["python", "mcp_reglas.py"]
+
+  # Agenda: quién es quién (nombre, apodos, WhatsApp, Naranja X). Se llena sola de los contactos de WhatsApp y de la
+  # agenda de Naranja X, y mantiene la memoria al día (apodos en la misión de guardado). Ver vault no-phone/AGENDA.md.
+  nophone-mcp-agenda:
+    <<: *app
+    depends_on: [hindsight]
+    environment:
+      <<: *app-env
+      MCP_TRANSPORT: http
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: "8814"
+      HINDSIGHT_URL: http://hindsight:8888
+      HINDSIGHT_BANK: ${HINDSIGHT_BANK:-}
+    volumes:
+      - app-data:/data
+      - wa-data:/wa:ro
+    command: ["python", "mcp_agenda.py"]
+
+  # ---------- whatsapp ----------
+  whatsapp:
+    build:
+      context: .
+      dockerfile: docker/whatsapp.Dockerfile
+    image: no-phone-whatsapp:latest
+    restart: unless-stopped
+    environment:
+      WA_BRIDGE_TOKEN: ${WA_BRIDGE_TOKEN:?corré docker/instalar.sh}
+      TZ: ${TZ:-America/Argentina/Mendoza}
+    volumes:
+      - wa-data:/data
+
+  # Notas de voz → texto, local y gratis (faster-whisper). Solo red interna; lee el volumen de WhatsApp en solo lectura.
+  stt:
+    build:
+      context: .
+      dockerfile: docker/stt.Dockerfile
+    image: no-phone-stt:latest
+    restart: unless-stopped
+    environment:
+      STT_MODEL: ${STT_MODEL:-small}
+      STT_THREADS: ${STT_THREADS:-4}
+      TZ: ${TZ:-America/Argentina/Mendoza}
+    volumes:
+      - wa-data:/wa:ro
+      - stt-models:/models
+    # el modelo small en int8 usa ~1 GB; tope para no tumbar una PC/VPS chica
+    mem_limit: 3g
+
+  # Voz del secretario en la llamada (Piper), local y gratis. Solo red interna; la consola le pide el audio.
+  tts:
+    build:
+      context: .
+      dockerfile: docker/tts.Dockerfile
+    image: no-phone-tts:latest
+    restart: unless-stopped
+    environment:
+      PIPER_VOZ: ${PIPER_VOZ:-es_MX-ald-medium}
+    volumes:
+      - tts-voces:/voces
+    mem_limit: 1g
+
+  # ---------- memoria ----------
+  hindsight:
+    image: ghcr.io/vectorize-io/hindsight:${HINDSIGHT_VERSION:-latest}
+    restart: unless-stopped
+    shm_size: 1g
+    env_file: .env
+    environment:
+      HINDSIGHT_API_LLM_PROVIDER: ${HINDSIGHT_LLM_PROVIDER:-deepseek}
+      HINDSIGHT_API_LLM_MODEL: ${HINDSIGHT_LLM_MODEL:-deepseek-v4-flash}
+      HINDSIGHT_API_LLM_BASE_URL: ${HINDSIGHT_LLM_BASE_URL:-https://api.deepseek.com}
+      # Sin key propia, usa la de OpenRouter (la misma que el secretario).
+      HINDSIGHT_API_LLM_API_KEY: ${HINDSIGHT_API_LLM_API_KEY:-${OPENROUTER_API_KEY:-}}
+      HINDSIGHT_API_WORKER_ID: no-phone
+      HINDSIGHT_API_ENABLE_BANK_LLM_HEALTH: "true"
+      # El reranker (cross-encoder en CPU) ordena todos los candidatos: con ~84 eran ~1 s antes de CADA mensaje.
+      # Cortar a 30 candidatos perdía recuerdos importantes («la madre le escribe»); se prueba flashrank.
+      HINDSIGHT_API_RERANKER_PROVIDER: ${HINDSIGHT_RERANKER_PROVIDER:-flashrank}
+      HINDSIGHT_API_RERANKER_FLASHRANK_MODEL: ${HINDSIGHT_RERANKER_FLASHRANK_MODEL:-ms-marco-TinyBERT-L-2-v2}
+    ports:
+      # UI propia de Hindsight (opcional): solo loopback, tiene datos personales.
+      - "127.0.0.1:${HINDSIGHT_UI_PORT:-9999}:9999"
+    volumes:
+      - hindsight-data:/home/hindsight/.pg0
+
+  # ---------- el secretario ----------
+  init:
+    <<: *app
+    restart: "no"
+    user: "10000:10000"
+    environment:
+      HERMES_HOME_DIR: /hermes
+      HINDSIGHT_URL: http://hindsight:8888
+      SECRETARIO_DUENO: ${SECRETARIO_DUENO:-tu dueño}
+    volumes:
+      - hermes-data:/hermes
+    entrypoint: ["python", "/app/docker/init_hermes.py"]
+    command: []
+
+  # Hermes no publica imagen: se compila desde su repo, fijado al commit probado. Solo se usa como base de
+  # `hermes` (que le aplica docker/hermes_parches.py); no corre sola. Compilar primero:
+  # docker compose --profile base build hermes-base && docker compose build hermes
+  hermes-base:
+    build:
+      # Docker 29 (BuildKit nuevo) no resuelve «#<commit>»: ahí usar scripts/build-hermes-base.sh.
+      context: https://github.com/NousResearch/hermes-agent.git#${HERMES_REF:-25c7827ec95c5f41cc90b1eeb147b92f0032ad3d}
+    image: no-phone-hermes-base:latest
+    profiles: ["base"]
+
+  hermes:
+    build:
+      context: .
+      dockerfile: docker/hermes.Dockerfile
+    image: no-phone-hermes:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      HERMES_UID: "10000"
+      HERMES_GID: "10000"
+      # API del secretario (llamada de la consola): solo en la red interna, con API_SERVER_KEY.
+      API_SERVER_HOST: 0.0.0.0
+      API_SERVER_PORT: "8642"
+      TZ: ${TZ:-America/Argentina/Mendoza}
+    depends_on:
+      init:
+        condition: service_completed_successfully
+      hindsight:
+        condition: service_started
+    volumes:
+      - hermes-data:/opt/data
+    # gateway = chat + programador de tareas (cron)
+    command: ["gateway", "run"]
+
+  # ---------- consola ----------
+  admin:
+    build:
+      context: .
+      dockerfile: docker/admin.Dockerfile
+      # Base = imagen del servicio hermes (compilarla antes: instalar.sh hace `build hermes` primero).
+      # No uso additional_contexts `service:` porque el builder clásico (sin buildx) no lo soporta.
+      args:
+        HERMES_IMAGE: no-phone-hermes:latest
+    image: no-phone-admin:latest
+    restart: unless-stopped
+    env_file: .env
+    depends_on: [hermes, hindsight, whatsapp]
+    # Mismo espacio de procesos que el gateway: `hermes cron status` lo ve corriendo.
+    pid: "service:hermes"
+    environment:
+      HINDSIGHT_URL: http://hindsight:8888
+      WA_BRIDGE_URL: http://whatsapp:8801
+      HERMES_API_URL: http://hermes:8642
+      AGENDA_URL: http://nophone-mcp-agenda:8814
+      TTS_URL: http://tts:8830
+      ANDROID_ADB_SERVER_HOST: ${ANDROID_ADB_SERVER_HOST:-adb}
+      ANDROID_ADB_SERVER_PORT: ${ANDROID_ADB_SERVER_PORT:-5037}
+      ADB_SERVER_SOCKET: tcp:${ANDROID_ADB_SERVER_HOST:-adb}:${ANDROID_ADB_SERVER_PORT:-5037}
+      NX_PHONES_FILE: /app-data/config/no-phone/phones.json
+      DEVICE_SECRETS_DIR: /app-data/config/no-phone/devices
+      # El puerto solo se publica en el loopback del host: el setup inicial llega por el gateway de Docker.
+      ADMIN_SETUP_ANY_IP: "1"
+      TZ: ${TZ:-America/Argentina/Mendoza}
+    ports:
+      - "127.0.0.1:${ADMIN_PORT:-8890}:8890"
+    volumes:
+      - hermes-data:/opt/data
+      - app-data:/app-data
+      - admin-data:/admin-data
+      # avisos del vigía de WhatsApp (vigilancias y tareas), solo lectura
+      - wa-data:/wa-data:ro
+
+volumes:
+  tts-voces:
+  stt-models:
+  app-data:
+  adb-keys:
+  wa-data:
+  hindsight-data:
+  hermes-data:
+  admin-data:

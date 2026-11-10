@@ -1,0 +1,12 @@
+# El celu está enchufado en OTRA máquina que corre su adb server (p. ej. la PC de casa, y este
+# compose en un VPS, unidos por Tailscale). No se levanta el servicio `adb` local.
+#   En la máquina del celu:  ./scripts/adb-gateway.sh <ip-tailscale>
+#   En .env de acá:          ANDROID_ADB_SERVER_HOST=<ip-tailscale-de-esa-máquina>
+#   docker compose -f compose.yaml -f compose.adb-remoto.yaml up -d
+services:
+  adb:
+    profiles: ["nunca"]
+  nophone-api:
+    depends_on: !reset []
+  nophone-mcp:
+    depends_on: !reset []

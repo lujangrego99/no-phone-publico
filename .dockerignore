@@ -1,0 +1,20 @@
+.git
+.env
+.env.*
+!.env.example
+.venv
+__pycache__
+*.py[cod]
+shots
+.device*.lock
+*.bak
+*.roto
+*.log
+compose*.yaml
+# binario y secretos del puente (la imagen del puente compila el suyo)
+whatsapp/bridge/whatsapp-bridge
+whatsapp/.env
+# consola: la imagen hace su propio npm ci + build
+admin/node_modules
+admin/web/dist
+.impeccable/review

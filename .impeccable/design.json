@@ -1,0 +1,319 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-20T21:39:29+00:00",
+  "title": "Design System: no-phone",
+  "extensions": {
+    "colorMeta": {
+      "void": {
+        "role": "neutral",
+        "displayName": "Emissive Void",
+        "tonalRamp": [
+          "#000000",
+          "#0a0a0a",
+          "#141414",
+          "#1f1f1f",
+          "#2b2b2b",
+          "#383838",
+          "#454545",
+          "#525252"
+        ]
+      },
+      "ash": {
+        "role": "neutral",
+        "displayName": "Ash",
+        "tonalRamp": [
+          "#0d0d0d",
+          "#141414",
+          "#1a1a1a",
+          "#222222",
+          "#2b2b2b",
+          "#353535",
+          "#404040",
+          "#4a4a4a"
+        ]
+      },
+      "dust": {
+        "role": "neutral",
+        "displayName": "Dust",
+        "tonalRamp": [
+          "#1a1a1a",
+          "#262626",
+          "#333333",
+          "#3e3e3e",
+          "#4a4a4a",
+          "#5a5a5a",
+          "#6a6a6a",
+          "#7b7b7b"
+        ]
+      },
+      "frost": {
+        "role": "neutral",
+        "displayName": "Frost",
+        "tonalRamp": [
+          "#2e2e2e",
+          "#424242",
+          "#575757",
+          "#6a6a6a",
+          "#7b7b7b",
+          "#939393",
+          "#acacac",
+          "#c6c6c6"
+        ]
+      },
+      "ivory": {
+        "role": "neutral",
+        "displayName": "Ivory",
+        "tonalRamp": [
+          "#3a3934",
+          "#56544e",
+          "#73706a",
+          "#918e86",
+          "#ada9a0",
+          "#c6c2b8",
+          "#d8d4c9",
+          "#e6e2d6"
+        ]
+      },
+      "signal": {
+        "role": "primary",
+        "displayName": "Phosphor Amber",
+        "tonalRamp": [
+          "#3d2a00",
+          "#5c4000",
+          "#7d5700",
+          "#a06f00",
+          "#c98b00",
+          "#ffb000",
+          "#ffc94d",
+          "#ffe3a3"
+        ]
+      },
+      "depth-0": {
+        "role": "neutral",
+        "displayName": "Depth 0 (back)"
+      },
+      "depth-1": {
+        "role": "neutral",
+        "displayName": "Depth 1"
+      },
+      "depth-2": {
+        "role": "neutral",
+        "displayName": "Depth 2 (body default)"
+      },
+      "depth-3": {
+        "role": "neutral",
+        "displayName": "Depth 3 (front)"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "One page statement ending in a period; 33px under 720px."
+      },
+      "title": {
+        "displayName": "Line",
+        "purpose": "Section heads, the front queue line, device names, wordmark."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Everything else: labels, metadata, inputs, buttons."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "ease",
+        "value": "cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "All state transitions."
+      },
+      {
+        "name": "depth-step",
+        "value": "color/letter-spacing 160ms, opacity 200ms, transform 220ms",
+        "purpose": "A line changing depth."
+      },
+      {
+        "name": "recede",
+        "value": "opacity 0.38, scale(0.992), origin left top",
+        "purpose": "Siblings of a pulled-forward plane."
+      },
+      {
+        "name": "pull",
+        "value": "260ms from opacity 0, translateX(-12px) scale(0.98)",
+        "purpose": "A plane entering the front."
+      },
+      {
+        "name": "caret-blink",
+        "value": "1.06s steps(1) infinite",
+        "purpose": "The amber caret."
+      },
+      {
+        "name": "dust-drift",
+        "value": "6 / 3 / 1.5 px/s far to near; eases to 0 when still or hidden",
+        "purpose": "Background dust fields; near field dropped under 720px; off under reduced motion."
+      },
+      {
+        "name": "saved-settle",
+        "value": "2.4s hold then fade",
+        "purpose": "Transient 'guardado' confirmation."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone",
+        "value": "520px"
+      },
+      {
+        "name": "narrow",
+        "value": "720px"
+      },
+      {
+        "name": "bar",
+        "value": "900px"
+      },
+      {
+        "name": "pulse-split",
+        "value": "960px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Button",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "Default command: square hairline frame with a '>' head that turns amber on hover.",
+      "html": "<button class=\"ds-btn\">volver a la cola</button>",
+      "css": ".ds-btn{font-family:'Departure Mono',ui-monospace,monospace;font-size:14px;line-height:22px;-webkit-font-smoothing:none;display:inline-flex;align-items:center;gap:1ch;min-height:33px;padding:0 1.4ch;border:1px solid #4a4a4a;border-radius:0;background:transparent;color:#e6e2d6;letter-spacing:0.02em;cursor:pointer;transition:border-color 120ms cubic-bezier(0.23,1,0.32,1),transform 100ms cubic-bezier(0.23,1,0.32,1)}.ds-btn::before{content:'>';color:#7b7b7b;transition:color 120ms}.ds-btn:hover{border-color:#7b7b7b}.ds-btn:hover::before{color:#ffb000}.ds-btn:focus-visible{outline:1px solid #ffb000;outline-offset:3px}.ds-btn:active{transform:scale(0.97)}"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one amber action per view.",
+      "html": "<button class=\"ds-btn-primary\">guardar PIN</button>",
+      "css": ".ds-btn-primary{font-family:'Departure Mono',ui-monospace,monospace;font-size:14px;line-height:22px;-webkit-font-smoothing:none;display:inline-flex;align-items:center;gap:1ch;min-height:33px;padding:0 1.4ch;border:1px solid #ffb000;border-radius:0;background:transparent;color:#ffb000;letter-spacing:0.02em;cursor:pointer;transition:background 120ms,transform 100ms}.ds-btn-primary::before{content:'>';color:#ffb000}.ds-btn-primary:hover{background:rgb(255 176 0 / 0.08)}.ds-btn-primary:focus-visible{outline:1px solid #ffb000;outline-offset:3px}.ds-btn-primary:active{transform:scale(0.97)}.ds-btn-primary:disabled{color:#4a4a4a;border-color:#1a1a1a;cursor:not-allowed}.ds-btn-primary:disabled::before{color:#4a4a4a}"
+    },
+    {
+      "name": "Quiet Icon Button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Frameless until hover; a pixelarticons icon replaces the '>' head (one head per button).",
+      "html": "<button class=\"ds-btn-quiet\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" aria-hidden=\"true\" fill=\"currentColor\" viewBox=\"0 0 24 24\">\n  <path d=\"M16 4h2v6h-2zm-2-2h2v2h-2zm0 2h2v8h-2zM4 8H2v5h2z\"/>\n  <path d=\"M4 6h16v2H4zm4 14H6v-6h2zm2 2H8v-2h2zm0-2H8v-8h2zm10-4h2v-5h-2z\"/>\n  <path d=\"M20 18H4v-2h16z\"/>\n</svg>volver a medir</button>",
+      "css": ".ds-btn-quiet{font-family:'Departure Mono',ui-monospace,monospace;font-size:14px;line-height:22px;-webkit-font-smoothing:none;display:inline-flex;align-items:center;gap:1ch;min-height:33px;padding:0 0.6ch;border:1px solid transparent;border-radius:0;background:transparent;color:#e6e2d6;letter-spacing:0.02em;cursor:pointer;transition:border-color 120ms}.ds-btn-quiet:hover{border-color:#4a4a4a}.ds-btn-quiet:focus-visible{outline:1px solid #ffb000;outline-offset:3px}.ds-btn-quiet svg{flex:none;fill:currentColor}"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Void ground, dust hairline, square; frost label above, hint below.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-label\">PIN de Naranja X</span><input class=\"ds-input\" placeholder=\"6 dígitos\"><span class=\"ds-label\">nunca se vuelve a mostrar</span></label>",
+      "css": ".ds-field{font-family:'Departure Mono',ui-monospace,monospace;font-size:14px;line-height:22px;-webkit-font-smoothing:none;display:grid;gap:4px;max-width:280px}.ds-label{color:#7b7b7b}.ds-input{font:inherit;min-height:33px;padding:5px 1.2ch 5px 1.6ch;border:1px solid #4a4a4a;border-radius:0;background:#000;color:#e6e2d6;caret-color:#ffb000;transition:border-color 120ms}.ds-input::placeholder{color:#7b7b7b}.ds-input:focus{outline:none;border-color:#7b7b7b}"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Standard nav; the active link is ivory with an amber '> ' location caret.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-link ds-active\" href=\"#\">pulso</a><a class=\"ds-nav-link\" href=\"#\">memoria</a><a class=\"ds-nav-link\" href=\"#\">secretario</a><a class=\"ds-nav-link\" href=\"#\">herramientas</a></nav>",
+      "css": ".ds-nav{font-family:'Departure Mono',ui-monospace,monospace;font-size:14px;line-height:22px;-webkit-font-smoothing:none;display:flex;flex-wrap:wrap;gap:0 2.4ch;background:#000;padding:0 16px}.ds-nav-link{display:inline-flex;align-items:center;min-height:44px;color:#7b7b7b;text-decoration:none;transition:color 120ms,letter-spacing 160ms}.ds-nav-link::before{content:'> ';white-space:pre;color:transparent}.ds-nav-link:hover{color:#c6c2b8}.ds-nav-link:focus-visible{outline:1px solid #ffb000;outline-offset:3px}.ds-active{color:#e6e2d6;letter-spacing:0.04em}.ds-active::before{color:#ffb000}"
+    },
+    {
+      "name": "Choice and Toggle",
+      "kind": "chip",
+      "refersTo": "",
+      "description": "Glyph-row choice and [x] toggles; selected and checked are ivory, never amber.",
+      "html": "<div class=\"ds-choice\"><span>fast</span><span class=\"ds-on\">normal</span><span>lento</span></div><div class=\"ds-toggle ds-on\">[x] fichas</div><div class=\"ds-toggle\">[ ] vividos</div>",
+      "css": ".ds-choice,.ds-toggle{font-family:'Departure Mono',ui-monospace,monospace;font-size:14px;line-height:22px;-webkit-font-smoothing:none;background:#000;padding:0 16px}.ds-choice{display:flex;gap:2.4ch;min-height:33px;align-items:center;color:#7b7b7b}.ds-choice .ds-on{color:#e6e2d6}.ds-choice .ds-on::before{content:'> ';white-space:pre}.ds-toggle{min-height:33px;display:flex;align-items:center;color:#7b7b7b;white-space:pre}.ds-toggle.ds-on{color:#e6e2d6}"
+    },
+    {
+      "name": "Scale Step",
+      "kind": "custom",
+      "refersTo": "scale-step",
+      "description": "1 to 5 disposition scale; the chosen step fills ivory.",
+      "html": "<div class=\"ds-scale\"><span>1</span><span>2</span><span>3</span><span class=\"ds-on\">4</span><span>5</span></div>",
+      "css": ".ds-scale{font-family:'Departure Mono',ui-monospace,monospace;font-size:14px;line-height:22px;-webkit-font-smoothing:none;display:flex;gap:4px;background:#000;padding:8px}.ds-scale span{display:inline-grid;place-items:center;width:33px;height:33px;border:1px solid #4a4a4a;color:#7b7b7b;cursor:pointer;transition:border-color 120ms}.ds-scale span:hover{border-color:#7b7b7b}.ds-scale .ds-on{background:#e6e2d6;border-color:#e6e2d6;color:#000}"
+    },
+    {
+      "name": "Queue Line",
+      "kind": "custom",
+      "refersTo": "queue-line-front",
+      "description": "The signature unit: depth sets brightness, tracking and size; failures carry a reversed cell; a dotted leader runs to the aside.",
+      "html": "<ol class=\"ds-queue\"><li class=\"ds-q ds-d3\"><span class=\"ds-mark\">&gt;</span><span class=\"ds-title\">Redmi 7 sin PIN de Naranja X</span><span class=\"ds-leader\"></span><span class=\"ds-aside\">celular</span></li><li class=\"ds-q ds-d2\"><span class=\"ds-mark\"><span class=\"ds-rev\">!</span></span><span class=\"ds-title\">herramienta naranjax caída</span><span class=\"ds-leader\"></span><span class=\"ds-aside\">hace 4 min</span></li><li class=\"ds-q ds-d0\"><span class=\"ds-mark\">·</span><span class=\"ds-title\">memoria en línea</span><span class=\"ds-leader\"></span><span class=\"ds-aside\">hindsight healthy</span></li></ol>",
+      "css": ".ds-queue{font-family:'Departure Mono',ui-monospace,monospace;font-size:14px;line-height:22px;-webkit-font-smoothing:none;list-style:none;margin:0;padding:16px;background:#000}.ds-q{display:flex;align-items:center;min-height:33px;padding:6px 0;transition:color 160ms,letter-spacing 160ms}.ds-q:hover{color:#e6e2d6}.ds-mark{flex:none;display:inline-grid;place-items:center;width:3ch;color:#e6e2d6}.ds-d3{color:#e6e2d6;letter-spacing:0.07em}.ds-d3 .ds-title{font-size:22px;line-height:33px}.ds-d3 .ds-mark{color:#ffb000}.ds-d2{color:#c6c2b8;letter-spacing:0.04em}.ds-d0{color:#7b7b7b;letter-spacing:0}.ds-d0 .ds-mark{color:#4a4a4a}.ds-leader{flex:1 1 auto;min-width:2ch;height:2px;margin:0 1ch;background-image:radial-gradient(circle,#4a4a4a 1px,transparent 1.2px);background-size:9px 2px;background-repeat:repeat-x}.ds-aside{color:#7b7b7b;letter-spacing:0}.ds-rev{display:inline-grid;place-items:center;min-width:1.6em;height:1.45em;padding:0 0.3em;background:#e6e2d6;color:#000;letter-spacing:0}"
+    },
+    {
+      "name": "Wordmark with Caret",
+      "kind": "custom",
+      "refersTo": "",
+      "description": "Wordmark at 22px tracked 0.07em with the blinking amber block caret.",
+      "html": "<div class=\"ds-wm\">no-phone<span class=\"ds-caret\"></span></div>",
+      "css": ".ds-wm{font-family:'Departure Mono',ui-monospace,monospace;font-size:22px;letter-spacing:0.07em;color:#e6e2d6;background:#000;padding:12px 16px}.ds-caret{display:inline-block;width:0.55em;height:0.9em;margin-left:0.12em;background:#ffb000;vertical-align:-0.08em;animation:ds-blink 1.06s steps(1) infinite}@keyframes ds-blink{50%{opacity:0}}@media (prefers-reduced-motion:reduce){.ds-caret{animation:none}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Cracktro Scroller Queue",
+    "overview": "**Creative North Star: \"The Cracktro Scroller Queue\"**\n\nThe console is one worked queue of what the secretary needs from its owner, laid on an emissive black void and ranked by depth. The line that needs you sits frontmost: brightest, widest-tracked, largest and dead still. Everything else recedes a step at a time into grey, and behind the work three fields of grey dust drift sideways like a demo-scene scroller. It is an operate surface: the world lends type, palette, density and one signature move (pull forward), never the navigation model or the controls, which stay standard web controls dressed in the world's glyphs.\n\nDensity is that of a terminal read late at night: one bitmap face at three sizes, text riding 22px baselines on an 11px unit, grouping by baseline and space instead of boxes, rules or cards. Rank is never a badge or a color code; it is integer depth mapped to brightness, tracking and drift. Failure is a reversed glyph cell, never a red.\n\nThe system refuses the category default of a sidebar plus a grid of stat cards and panels.",
+    "keyCharacteristics": [
+      "One bitmap face (Departure Mono) at 14 / 22 / 44, unsmoothed, tabular numerals.",
+      "Five neutrals on pure black plus one signal amber held to a handful of marks.",
+      "State is depth: 0 to 3 maps to brightness step, letter-spacing and drift rate.",
+      "No containers: no cards, no side stripes, no dividers, zero radius everywhere.",
+      "Glyph heads (\">\", \"·\", \"[x]\") stand in for bullets, radios and checkboxes.",
+      "A canvas of drifting dust behind the work, frozen whenever a plane is pulled forward."
+    ],
+    "rules": [
+      {
+        "name": "The Amber Budget Rule",
+        "body": "At rest, amber appears only on the caret (wordmark, waiting lines, and the \"> \" head of the active nav link or tab), the front line's mark and one primary action per view. Selected choices, checked toggles and the chosen scale step are ivory, never amber.",
+        "section": "colors"
+      },
+      {
+        "name": "The Reversed Cell Rule",
+        "body": "Failure, a down tool and a missing secret render as a reversed glyph cell: ivory ground, void glyph (\"!\" or \"falta\"). There is no red in the system.",
+        "section": "colors"
+      },
+      {
+        "name": "The Depth Is Rank Rule",
+        "body": "Importance is shown only by depth (brightness, tracking, size at the front). Never by a colored badge, pill or tinted row.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Face Rule",
+        "body": "Departure Mono at 14, 22 and 44 only. No second family, no bold, no italics; emphasis is size, brightness or tracking.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tracking Is Depth Rule",
+        "body": "Letter-spacing steps 0 / 0.02 / 0.04 / 0.07em with depth 0 to 3. Metadata and asides reset to 0.",
+        "section": "typography"
+      },
+      {
+        "name": "The Pull Forward Rule",
+        "body": "Detail opens as a plane pulled forward over the queue (260ms, from 12px left at 0.98 scale), never as a modal, drawer or new card. Siblings recede, dust freezes.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Still Front Rule",
+        "body": "Whatever is being read does not move: the front plane freezes all drift; reduced motion stops the dust and caret entirely.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do rank by depth only: brightness depth-0 to depth-3, tracking 0 to 0.07em, 22px for the front line.",
+      "Do keep amber to the caret, the front line's mark and one primary action per view at rest.",
+      "Do render failure, down tools and missing secrets as a reversed glyph cell (ivory ground, void glyph).",
+      "Do give every button exactly one head: \">\" or a pixelarticons icon.",
+      "Do open detail by pulling a plane forward: siblings to 0.38 opacity, dust frozen, Escape returns.",
+      "Do keep all spacing on the 11px unit and indent sub-content 3ch under its line's text.",
+      "Do put the explanation before the action under 720px, and wrap the nav into its own row."
+    ],
+    "donts": [
+      "Don't box content: no cards, panels, side stripes or dividers; a plane is separated by depth, and its void fill is for legibility only.",
+      "Don't use amber for selected choices, checked toggles or the chosen scale step; those are ivory.",
+      "Don't introduce red, green or any hue beyond amber; status is brightness and the reversed cell.",
+      "Don't pair the \">\" head and an icon on the same button.",
+      "Don't add a second typeface, bold weights or rounded corners.",
+      "Don't let anything move while it is being read."
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+#!/data/data/com.termux/files/usr/bin/sh
+# no-phone: túnel inverso al VPS para que maneje este celu por adb (adbd en 127.0.0.1:5555, auth RSA de adb).
+# El usuario celu12t del VPS solo puede abrir 172.19.0.1:15555 (red privada de docker): ni shell ni otros puertos.
+# Solo corre si no-phone está PRENDIDO (~/.nophone-on, lo maneja `nophone on|off`, botones de Termux:Widget).
+PID=$PREFIX/var/run/tunel-np.pid
+LOG=$HOME/.tunel-np.log
+ON=$HOME/.nophone-on
+[ -f "$HOME/.nophone.env" ] && . "$HOME/.nophone.env"  # NP_VPS_HOST=… (y NP_TUNEL_USER si no es celu12t)
+case "$1" in
+  stop)
+    [ -f "$PID" ] && kill "$(cat "$PID")" 2>/dev/null; pkill -f 'ssh -N .*celu12t@' ; rm -f "$PID"
+    termux-wake-unlock; exit 0 ;;
+  status)
+    if [ -f "$PID" ] && kill -0 "$(cat "$PID")" 2>/dev/null; then echo "túnel: corriendo"; tail -2 "$LOG"; else echo "túnel: frenado"; fi; exit 0 ;;
+esac
+[ -f "$ON" ] || { echo "no-phone está APAGADO: el túnel no arranca (prendelo con el botón)"; exit 1; }
+if [ -f "$PID" ] && kill -0 "$(cat "$PID")" 2>/dev/null; then exit 0; fi
+mkdir -p "$(dirname "$PID")"
+(
+  while [ -f "$ON" ]; do
+    echo "$(date '+%F %T') conectando" >> "$LOG"
+    ssh -N -T -i "$HOME/.ssh/tunel" \
+      -o BatchMode=yes -o IdentitiesOnly=yes \
+      -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts_np" \
+      -o ExitOnForwardFailure=yes -o ServerAliveInterval=20 -o ServerAliveCountMax=3 \
+      -o ConnectTimeout=15 \
+      -R 172.19.0.1:15555:127.0.0.1:5555 "${NP_TUNEL_USER:-celu12t}@${NP_VPS_HOST:?definí NP_VPS_HOST en ~/.nophone.env}" >> "$LOG" 2>&1
+    echo "$(date '+%F %T') cortado ($?), reintento en 15 s" >> "$LOG"
+    tail -200 "$LOG" > "$LOG.t" && mv "$LOG.t" "$LOG"
+    sleep 15
+  done
+) &
+echo $! > "$PID"
+termux-wake-lock
+echo "túnel arrancado"

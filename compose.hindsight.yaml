@@ -1,0 +1,30 @@
+# Solo para la instalación SIN el compose completo (Hermes y la app en el host). Con compose.yaml no hace falta: ya incluye Hindsight.
+# Memoria del secretario: Hindsight (MIT) — entidades, grafo, tiempo, observaciones consolidadas.
+#   docker compose -f compose.hindsight.yaml up -d
+#   API  http://127.0.0.1:8888  (Hermes la usa en modo local_external)
+#   UI   http://127.0.0.1:9999  (vista de administración)
+# Secretos en ~/.config/no-phone/hindsight.env (600): HINDSIGHT_API_LLM_API_KEY=…
+name: no-phone-memoria
+
+services:
+  hindsight:
+    image: ghcr.io/vectorize-io/hindsight:latest
+    restart: unless-stopped
+    shm_size: 1g
+    env_file: ${HINDSIGHT_ENV_FILE:-${HOME}/.config/no-phone/hindsight.env}
+    environment:
+      # LLM solo para guardar (extraer hechos/entidades) y reflect; recall no usa LLM.
+      HINDSIGHT_API_LLM_PROVIDER: ${HINDSIGHT_LLM_PROVIDER:-deepseek}
+      HINDSIGHT_API_LLM_MODEL: ${HINDSIGHT_LLM_MODEL:-deepseek-v4-flash}
+      HINDSIGHT_API_LLM_BASE_URL: ${HINDSIGHT_LLM_BASE_URL:-https://api.deepseek.com}
+      HINDSIGHT_API_WORKER_ID: no-phone
+      HINDSIGHT_API_ENABLE_BANK_LLM_HEALTH: "true"
+    ports:
+      # Solo loopback: la memoria tiene datos personales.
+      - "127.0.0.1:8888:8888"
+      - "127.0.0.1:9999:9999"
+    volumes:
+      - hindsight-data:/home/hindsight/.pg0
+
+volumes:
+  hindsight-data:

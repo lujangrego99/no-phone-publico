@@ -1,0 +1,18 @@
+# systemd --user: mantiene el dispositivo vinculado escuchando 24/7.
+#   cp whatsapp/systemd/no-phone-whatsapp.service ~/.config/systemd/user/
+#   (ajustar ExecStart si el repo vive en otro path)
+#   systemctl --user daemon-reload && systemctl --user enable --now no-phone-whatsapp
+#   journalctl --user -u no-phone-whatsapp -f
+[Unit]
+Description=no-phone WhatsApp bridge (whatsmeow)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=%h/Documentos/GitHub/no-phone/whatsapp/bridge/whatsapp-bridge
+Restart=on-failure
+RestartSec=10
+# EnvironmentFile=-%h/Documentos/GitHub/no-phone/whatsapp/.env
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,7 @@
+fastapi>=0.150
+uvicorn>=0.54
+uiautomator2==3.7.0  # fijo: vendor/u2 parchea su u2.jar (servidor solo en 127.0.0.1)
+pydantic>=2.14
+fastmcp>=2.10,<3
+httpx>=0.28
+pyyaml>=6

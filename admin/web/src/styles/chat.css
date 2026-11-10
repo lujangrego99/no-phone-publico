@@ -1,0 +1,1206 @@
+/* Chat con el secretario (pages/Llamada.tsx): pantalla fija como una app de chat.
+   La página no scrollea; scrollean solas la lista de charlas, los mensajes y la columna «te espera».
+   Arriba: título de la charla. Abajo: la caja de texto, siempre a la vista. */
+
+:root:has(.call-layout) {
+  --page: 1400px;
+}
+body:has(.call-layout) {
+  overflow: hidden;
+}
+.stage:has(.call-layout) {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  min-height: 0;
+}
+.stage:has(.call-layout) > .topbar {
+  flex: none;
+}
+.page:has(> .call-layout) {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  padding-top: var(--sp-4);
+  padding-bottom: calc(var(--sp-4) + env(safe-area-inset-bottom, 0px));
+  overflow: hidden;
+}
+
+/* ---------- grilla: charlas · chat · (te espera | llamada) ---------- */
+.call-layout {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 264px minmax(0, 1fr);
+  gap: var(--sp-5);
+}
+.call-layout[data-pendiente="true"],
+.call-layout[data-llamada="true"] {
+  grid-template-columns: 264px minmax(0, 1fr) minmax(320px, 380px);
+}
+.call-layout > * {
+  min-height: 0;
+}
+
+/* ---------- charlas ---------- */
+.charlas-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  background: var(--s1);
+  overflow: hidden;
+}
+.charlas-acciones {
+  flex: none;
+  display: grid;
+  gap: 4px;
+  padding: var(--sp-3);
+  border-bottom: 1px solid var(--line);
+}
+.charlas-nueva {
+  justify-content: flex-start;
+}
+.charlas-conocer {
+  justify-content: flex-start;
+  color: var(--tx-3);
+}
+.charlas-buscar {
+  position: relative;
+  display: block;
+  margin-top: 4px;
+}
+.charlas-buscar .icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--tx-3);
+  pointer-events: none;
+}
+.charlas-buscar .input {
+  min-height: 38px;
+  padding-left: 32px;
+  background: var(--bg);
+}
+.charlas-grupos,
+.charlas-cargando,
+.charlas-vacio {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--sp-2) var(--sp-2) var(--sp-3);
+}
+.charlas-vacio {
+  padding: var(--sp-4);
+}
+.charlas-grupo + .charlas-grupo {
+  margin-top: var(--sp-3);
+}
+.charlas-grupo-nombre {
+  padding: 4px 10px;
+  color: var(--tx-3);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.charlas-grupo ol {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.charla {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--sp-2);
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--r-1);
+  background: none;
+  color: var(--tx-2);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms var(--ease);
+}
+/* Dos renglones: muchas charlas empiezan igual («te tengo una misión: a las…») y con uno solo no se distinguen. */
+.charla-titulo {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.charla-cuando {
+  padding-top: 2px;
+  color: var(--tx-3);
+  font-size: 12px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .charla:hover {
+    background: var(--s2);
+    color: var(--tx);
+  }
+}
+.charla[data-actual="true"] {
+  background: var(--s3);
+  color: var(--tx);
+  font-weight: 600;
+}
+.charla[data-actual="true"] .charla-cuando {
+  color: var(--signal);
+  font-weight: 400;
+}
+/* la lista dentro de la hoja (celu) */
+.dlg-charlas .dlg-body {
+  padding: 0;
+  gap: 0;
+}
+.dlg-charlas .charlas-acciones {
+  padding: 0 var(--sp-4) var(--sp-3);
+}
+.dlg-charlas .charla {
+  min-height: 48px;
+}
+
+/* ---------- columna del chat ---------- */
+.call {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+}
+.chat-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  padding-bottom: var(--sp-2);
+}
+.chat-titulo {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--tx);
+  font-size: 16px;
+  font-weight: 600;
+}
+.chat-head-acciones {
+  flex: none;
+  display: flex;
+  gap: 4px;
+}
+.chat-voz {
+  color: var(--tx-3);
+}
+
+/* avisos fijos arriba de la charla (vigilancias, misiones, algo caído) */
+.avisos-fijos {
+  flex: none;
+  display: grid;
+  gap: 8px;
+  margin-bottom: var(--sp-2);
+  max-height: min(28vh, 220px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.aviso-fijo {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "icon texto acciones"
+    "icon meta acciones";
+  column-gap: var(--sp-3);
+  row-gap: 2px;
+  align-items: start;
+  padding: 10px 10px 10px 12px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-2);
+  background: var(--s2);
+  color: var(--tx);
+  line-height: 1.45;
+}
+.aviso-fijo > .icon {
+  grid-area: icon;
+  margin-top: 2px;
+}
+.aviso-fijo[data-tono="info"] {
+  border-color: rgb(121 168 255 / 0.45);
+  background: rgb(121 168 255 / 0.16);
+}
+.aviso-fijo[data-tono="info"] > .icon {
+  color: var(--info);
+}
+.aviso-fijo[data-tono="bad"] {
+  border-color: rgb(255 116 102 / 0.45);
+  background: rgb(255 116 102 / 0.16);
+}
+.aviso-fijo[data-tono="bad"] > .icon {
+  color: var(--bad);
+}
+.aviso-texto {
+  grid-area: texto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+  font-size: 15px;
+  color: var(--tx);
+}
+.aviso-fijo > .meta {
+  grid-area: meta;
+  font-size: 13px;
+}
+.aviso-fijo > .btn,
+.aviso-fijo > a.btn {
+  grid-area: acciones;
+  align-self: center;
+  flex: none;
+}
+/* caído: una línea fina (borde rojo a la izquierda), arreglo como link y × para sacarla del chat */
+.aviso-caido {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 34px;
+  padding: 2px 2px 2px 10px;
+  border-left: 2px solid var(--bad);
+  border-radius: 0 var(--r-1) var(--r-1) 0;
+  background: var(--bad-soft);
+  font-size: 14px;
+  line-height: 1.35;
+}
+.aviso-caido > .icon {
+  color: var(--bad);
+}
+.aviso-caido-texto {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--tx);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.aviso-caido-accion {
+  flex: none;
+  padding: 4px 6px;
+  border-radius: var(--r-1);
+  color: var(--tx-2);
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+.aviso-caido-accion:hover {
+  color: var(--tx);
+}
+.aviso-caido-x {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: var(--r-1);
+  background: none;
+  color: var(--tx-3);
+  cursor: pointer;
+}
+.aviso-caido-x:hover {
+  background: var(--s2);
+  color: var(--tx);
+}
+.aviso-caido-accion:focus-visible,
+.aviso-caido-x:focus-visible {
+  outline: 2px solid var(--tx-2);
+  outline-offset: 1px;
+}
+@media (pointer: coarse) {
+  .aviso-caido-x {
+    width: 44px;
+    height: 44px;
+  }
+  .aviso-caido-accion {
+    padding: 12px 8px;
+  }
+}
+
+/* un solo botón/acción a la derecha; si no hay .meta, el texto usa las dos filas */
+.aviso-fijo:not(:has(> .meta)) {
+  grid-template-areas: "icon texto acciones";
+  align-items: center;
+}
+
+/* ---------- mensajes ---------- */
+.call-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--sp-2) var(--sp-2) var(--sp-4) 0;
+  scrollbar-gutter: stable;
+}
+.call-panel[data-estado="hablando"] {
+  cursor: pointer;
+}
+.call-lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  width: min(100%, 760px);
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+.msg {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.msg-burbuja {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  line-height: 1.55;
+}
+.msg-burbuja strong {
+  color: var(--tx);
+  font-weight: 700;
+}
+.msg-hora {
+  color: var(--tx-3);
+  font-size: 12px;
+}
+/* lo tuyo: burbuja a la derecha */
+.msg-vos {
+  align-items: flex-end;
+}
+.msg-vos .msg-burbuja {
+  max-width: min(80%, 560px);
+  padding: 10px 14px;
+  border-radius: 16px 16px 4px 16px;
+  background: #2a2416;
+  color: var(--tx);
+  border: 1px solid rgb(255 176 0 / 0.16);
+}
+.msg-vos .msg-hora {
+  padding-right: 4px;
+}
+.msg-parcial .msg-burbuja {
+  opacity: 0.6;
+  border-style: dashed;
+}
+.msg-espera .msg-burbuja {
+  opacity: 0.75;
+}
+/* el secretario: texto a la izquierda, sin burbuja (se lee como una respuesta, no como un globo) */
+.msg-secretario {
+  align-items: flex-start;
+}
+.msg-secretario .msg-burbuja {
+  max-width: 68ch;
+  color: var(--tx);
+  font-size: 15.5px;
+}
+/* evento de una misión (lo que la despertó) */
+.msg-mision {
+  align-items: stretch;
+}
+.msg-evento {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px var(--sp-2);
+  padding: 8px 12px;
+  border: 1px dashed var(--line-2);
+  border-radius: var(--r-2);
+  color: var(--tx-3);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.msg-evento .chip {
+  align-self: center;
+}
+.msg-evento-texto {
+  flex: 1 1 20ch;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+/* tarjetas de herramientas */
+.msg-herramienta {
+  align-items: flex-start;
+}
+.msg-herramienta > .tc-card {
+  width: min(100%, 460px);
+}
+.msg-fijado {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--wait-soft);
+  color: var(--wait);
+  font-size: 13.5px;
+}
+.solo-angosto-inline {
+  display: none;
+}
+/* una decisión que el secretario todavía está armando: sin tarjeta ni botones hasta que termine el turno */
+.msg-armando {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--s2);
+  color: var(--tx-2);
+  font-size: 13.5px;
+}
+/* pensando: tres puntos + qué está haciendo */
+.msg-pensando {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--sp-3);
+  color: var(--tx-2);
+  font-size: 14px;
+}
+.typing {
+  display: inline-flex;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--s2);
+}
+.typing i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--tx-3);
+  animation: typing 1.2s ease-in-out infinite;
+}
+.typing i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.typing i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+@keyframes typing {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  30% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+.msg-cortado .aviso-fijo {
+  width: 100%;
+}
+.call-lines + .failure,
+.call-panel > .failure {
+  width: min(100%, 760px);
+  margin: var(--sp-3) auto 0;
+}
+
+/* vacío / cargando */
+.chat-vacio {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: var(--sp-2);
+  min-height: 100%;
+  padding: var(--sp-6) var(--sp-4);
+  text-align: center;
+}
+.chat-vacio-titulo {
+  font-family: var(--face-brand);
+  font-size: 24px;
+  color: var(--tx);
+}
+.sugerencias {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sp-2);
+  max-width: 560px;
+  margin-top: var(--sp-4);
+}
+.sugerencia {
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  background: var(--s1);
+  color: var(--tx-2);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition:
+    background-color 120ms var(--ease),
+    color 120ms var(--ease),
+    border-color 120ms var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .sugerencia:hover {
+    border-color: var(--tx-3);
+    background: var(--s2);
+    color: var(--tx);
+  }
+}
+.sugerencia:active {
+  transform: scale(0.97);
+}
+.chat-cargando {
+  display: grid;
+  gap: var(--sp-4);
+  width: min(100%, 760px);
+  margin: var(--sp-4) auto;
+}
+.chat-cargando .skeleton {
+  height: 16px;
+}
+
+.ir-final {
+  position: absolute;
+  right: 16px;
+  bottom: 96px;
+  z-index: 3;
+  border-radius: 999px;
+  box-shadow: var(--shadow-float);
+  animation: toast-in 180ms var(--ease) both;
+}
+
+/* reseña opcional al colgar */
+.resena {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+  width: min(100%, 760px);
+  margin: var(--sp-4) auto 0;
+  padding: 8px 8px 8px 14px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-2);
+  background: var(--s2);
+  color: var(--tx);
+}
+.resena > span:first-child {
+  margin-right: auto;
+}
+.resena form {
+  display: flex;
+  flex: 1;
+  gap: var(--sp-2);
+}
+.resena .input {
+  flex: 1;
+  min-width: 12ch;
+  min-height: 32px;
+}
+
+/* ---------- barra de abajo: estado + composer ---------- */
+.call-bar {
+  flex: none;
+  display: grid;
+  gap: var(--sp-2);
+  width: min(100%, 760px);
+  margin: 0 auto;
+  padding-top: var(--sp-2);
+}
+.trabajo {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  color: var(--tx-2);
+  font-size: 13.5px;
+}
+.trabajo[data-ocupado="false"] {
+  display: none;
+}
+.trabajo-punto {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--signal);
+  animation: trabajo-late 1s ease-in-out infinite alternate;
+}
+.trabajo-que {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--tx);
+}
+@keyframes trabajo-late {
+  from {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.composer {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sp-2);
+  padding: 6px 6px 6px 14px;
+  border: 1px solid var(--line-input);
+  border-radius: 16px;
+  background: var(--s1);
+  transition:
+    border-color 120ms var(--ease),
+    box-shadow 120ms var(--ease);
+}
+.composer:focus-within {
+  border-color: var(--tx-3);
+  box-shadow: 0 0 0 3px rgb(255 176 0 / 0.14);
+}
+.composer-texto {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 40px;
+  max-height: 168px;
+  padding: 9px 0;
+  border: 0;
+  background: transparent;
+  color: var(--tx);
+  font: inherit;
+  font-size: 15.5px;
+  line-height: 22px;
+  resize: none;
+  overflow-y: auto;
+}
+.composer-texto:focus {
+  outline: none;
+}
+.composer-texto::placeholder {
+  color: var(--tx-3);
+}
+.composer-acciones {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.composer-llamar {
+  border-radius: 12px;
+}
+.composer-enviar {
+  border-radius: 12px;
+}
+@media (pointer: coarse) {
+  .composer-texto {
+    font-size: 16px;
+  }
+}
+
+/* «te espera» en tablet/celu: arriba de la caja (la columna derecha se esconde) */
+.pend-movil {
+  display: none;
+}
+.pend-movil-boton {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid rgb(215 168 255 / 0.45);
+  border-radius: var(--r-2);
+  background: rgb(215 168 255 / 0.16);
+  color: var(--tx);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.pend-movil-boton > .chip {
+  flex: none;
+  margin-top: 1px;
+}
+.pend-movil-boton > .icon {
+  flex: none;
+  margin-top: 2px;
+  color: var(--tx-2);
+}
+.pend-movil-que {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--tx);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+.pend-movil .tc-card,
+.pend-movil .rg-card {
+  max-width: 100%;
+  width: 100%;
+}
+
+/* ---------- columna «te espera» (desktop) ---------- */
+.pend-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--sp-4);
+  border: 1px solid rgb(215 168 255 / 0.3);
+  border-radius: var(--r-2);
+  background: var(--s1);
+}
+.pend-titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--tx);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+.pend-panel .tc-card,
+.pend-panel .rg-card {
+  max-width: 100%;
+  width: 100%;
+}
+
+/* ---------- ajustes de voz (dentro del diálogo) ---------- */
+.voz-ajustes {
+  display: grid;
+  gap: var(--sp-4);
+}
+.voz-estado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--tx);
+}
+.voz-elegir {
+  display: grid;
+  gap: var(--sp-3);
+}
+.voz-elegir > .btn {
+  justify-self: start;
+}
+.voz-cuenta {
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-2);
+  background: var(--s2);
+}
+.voz-cuenta > summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  color: var(--tx);
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.voz-cuenta > summary::-webkit-details-marker {
+  display: none;
+}
+.voz-cuenta > summary::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  margin-left: auto;
+  border-right: 2px solid var(--tx-3);
+  border-bottom: 2px solid var(--tx-3);
+  transform: rotate(45deg);
+  transition: transform 160ms var(--ease);
+}
+.voz-cuenta[open] > summary::after {
+  transform: rotate(-135deg);
+}
+.voz-cuenta-campos {
+  display: grid;
+  gap: var(--sp-4);
+  padding: 0 var(--sp-4) var(--sp-4);
+}
+.voz-msg {
+  color: var(--ok);
+}
+.voz-ajustes-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+}
+
+/* gestor de voces */
+.voces {
+  display: grid;
+  gap: var(--sp-3);
+}
+.voces-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.voces-filtros .activo {
+  color: var(--signal);
+}
+.voces-filtros .input {
+  flex: 1 1 9rem;
+  min-width: 0;
+}
+.voces-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 22rem;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  background: var(--s1);
+}
+.voz-fila {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: var(--sp-2);
+  align-items: center;
+  padding: 6px 10px;
+}
+.voz-fila + .voz-fila {
+  border-top: 1px solid var(--line);
+}
+.voz-fila[data-uso="true"] {
+  background: var(--signal-soft);
+}
+.voz-fila[data-uso="true"] .voz-nombre b {
+  color: var(--signal);
+}
+.voz-nombre {
+  display: grid;
+  min-width: 0;
+}
+.voz-desc {
+  color: var(--tx-3);
+  font-size: 13px;
+}
+.voz-fav[aria-pressed="true"] {
+  color: var(--signal);
+}
+
+/* ---------- pantalla de llamada ---------- */
+.cs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--sp-5) var(--sp-4);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-2);
+  background: var(--s1);
+}
+.cs-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  color: var(--tx-2);
+}
+.cs-quien {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-weight: 600;
+}
+.cs-vivo {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 0 3px var(--ok-soft);
+}
+.cs-top .num {
+  color: var(--tx);
+  font-family: var(--face-brand);
+}
+.cs-orb {
+  --nivel: 0;
+  --prog: 0;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(62vw, 220px);
+  aspect-ratio: 1;
+  margin-top: var(--sp-3);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.cs-core {
+  width: 62%;
+  aspect-ratio: 1;
+  border: 2px solid var(--tx);
+  border-radius: 50%;
+  transform: scale(calc(1 + var(--nivel) * 0.45));
+  transition:
+    transform 70ms linear,
+    background-color 200ms var(--ease),
+    border-color 200ms var(--ease);
+  box-shadow: 0 0 calc(var(--nivel) * 60px) rgb(236 232 220 / 0.3);
+}
+.cs-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.cs-ring circle {
+  fill: none;
+  stroke: var(--signal);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 351.9;
+  stroke-dashoffset: calc(351.9 * (1 - var(--prog)));
+  transition: stroke-dashoffset 80ms linear;
+}
+.cs[data-estado="hablando"] .cs-core {
+  border-color: var(--signal);
+  background: var(--signal);
+}
+.cs[data-estado="pensando"] .cs-core {
+  border-style: dashed;
+  border-color: var(--tx-2);
+  animation: cs-piensa 2.4s linear infinite;
+}
+.cs[data-mute="true"] .cs-core {
+  border-color: var(--tx-3);
+  opacity: 0.55;
+}
+@keyframes cs-piensa {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cs-core {
+    animation: none !important;
+    transition: none;
+  }
+}
+.cs-state {
+  margin: 0;
+  color: var(--tx);
+  font-size: 17px;
+  font-weight: 600;
+  text-align: center;
+}
+.cs-caption {
+  width: 100%;
+  min-height: 3.2em;
+  margin: 0;
+  color: var(--tx-2);
+  text-align: center;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+.cs-tool {
+  display: grid;
+  justify-items: center;
+  width: min(100%, 440px);
+}
+.cs-tool .tc-card {
+  width: 100%;
+}
+.cs-voz {
+  display: flex;
+  gap: var(--sp-2);
+  align-items: center;
+  justify-content: center;
+}
+.cs-voz .select {
+  width: auto;
+}
+.cs-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sp-2);
+  margin-top: auto;
+  padding-top: var(--sp-3);
+  width: 100%;
+}
+.cs-actions .btn {
+  flex: 1 1 0;
+  min-height: 48px;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.cs .failure {
+  width: 100%;
+}
+
+/* ---------- angosto / tablet ---------- */
+.solo-angosto {
+  display: none;
+}
+/* Desktop medio: no aplastar el chat entre lista y «te espera» */
+@media (max-width: 1280px) {
+  .call-layout[data-pendiente="true"],
+  .call-layout[data-llamada="true"] {
+    grid-template-columns: 200px minmax(0, 1fr) minmax(280px, 340px);
+  }
+}
+/* Tablet y angosto (≤1024): una columna. Charlas en hoja; pendientes arriba del composer. */
+@media (max-width: 1024px) {
+  .call-layout,
+  .call-layout[data-pendiente="true"],
+  .call-layout[data-llamada="true"] {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .call-layout > .call {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .charlas-panel,
+  .pend-panel {
+    display: none;
+  }
+  .solo-angosto {
+    display: inline-flex;
+  }
+  .solo-ancho {
+    display: none;
+  }
+  .solo-angosto-inline {
+    display: inline;
+  }
+  .pend-movil {
+    display: block;
+  }
+  .pend-movil[data-abierto="true"] {
+    display: grid;
+    gap: var(--sp-3);
+    max-height: min(55dvh, 420px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-bottom: 2px;
+  }
+  .pend-movil[data-abierto="true"] .pend-movil-que {
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+  }
+  .avisos-fijos {
+    max-height: min(32vh, 260px);
+  }
+  /* aviso: texto arriba, meta + acción abajo (no se pisan en 768–900) */
+  .aviso-fijo {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "icon texto"
+      "icon meta"
+      ". acciones";
+  }
+  .aviso-fijo > .btn,
+  .aviso-fijo > a.btn {
+    justify-self: start;
+    min-height: 40px;
+  }
+  .aviso-fijo:not(:has(> .meta)) {
+    grid-template-areas:
+      "icon texto"
+      ". acciones";
+  }
+  .page:has(> .call-layout) {
+    padding-top: var(--sp-3);
+  }
+  /* la llamada tapa el chat entero: se usa de oído, con los botones abajo al alcance del pulgar */
+  .call-layout > .cs {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    border: 0;
+    border-radius: 0;
+    padding: calc(var(--sp-5) + env(safe-area-inset-top, 0px)) var(--sp-4) calc(var(--sp-4) + env(safe-area-inset-bottom, 0px));
+    background: var(--bg);
+  }
+}
+@media (max-width: 900px) {
+  .page:has(> .call-layout) {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  .chat-voz-txt {
+    display: none;
+  }
+  .ir-final {
+    bottom: 84px;
+  }
+}
+@media (max-width: 720px) {
+  .page:has(> .call-layout) {
+    padding-top: var(--sp-2);
+  }
+  .call-panel {
+    padding-right: 0;
+  }
+  .msg-vos .msg-burbuja {
+    max-width: 88%;
+  }
+  .composer-llamar span {
+    display: none;
+  }
+  .composer-llamar {
+    width: var(--control);
+    padding: 0;
+  }
+}
+.dlg-charlas .charla[data-actual="true"] {
+  background: rgb(255 255 255 / 0.07);
+}
+@media (hover: hover) and (pointer: fine) {
+  .dlg-charlas .charla:hover {
+    background: rgb(255 255 255 / 0.05);
+  }
+}

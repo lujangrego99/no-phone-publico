@@ -1,0 +1,654 @@
+/* Tarjetas de herramientas: ventanas a otras apps (WhatsApp, Naranja X, Movilidad, reglas, misiones). Acá van sus colores y logos. */
+.tc-logo {
+  display: inline-flex;
+  flex: none;
+}
+
+.tc-logo svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+.tc-whatsapp {
+  --tc: #25d366;
+}
+
+.tc-naranjax {
+  --tc: #ff5a00;
+}
+
+.tc-movilidad {
+  --tc: #4b8bf5;
+}
+
+.tc-otra {
+  --tc: var(--b0);
+}
+
+/* línea mínima: logo + app + qué hace */
+.tc-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 1ch;
+  min-width: 0;
+  color: var(--b0);
+}
+
+.tc-line .tc-logo {
+  color: var(--tc);
+}
+
+.tc-app {
+  color: var(--tc);
+}
+
+.tc-what {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.tc-dots::after {
+  content: "…";
+  animation: tc-blink 1s steps(2) infinite;
+}
+
+@keyframes tc-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.tc-err {
+  flex-basis: 100%;
+  color: var(--b2);
+}
+
+/* tarjeta */
+.tc-card {
+  margin: 0;
+  max-width: 440px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #111b21;
+  color: #e9edef;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  letter-spacing: 0;
+  line-height: 1.35;
+}
+
+.tc-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #202c33;
+}
+
+.tc-head .tc-logo {
+  color: var(--tc);
+}
+
+.tc-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.tc-title > span {
+  display: grid;
+  min-width: 0;
+}
+
+.tc-title small,
+.tc-card small {
+  color: #8696a0;
+  font-size: 12px;
+}
+
+.tc-title strong {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tc-avatar {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #8a9aa3;
+  color: #0b1014;
+  font-weight: 700;
+}
+
+.tc-body {
+  padding: 10px 12px;
+}
+
+.tc-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px 12px;
+}
+
+.tc-status {
+  color: #8696a0;
+  font-size: 12px;
+}
+
+.tc-bad {
+  color: #f15c6d;
+}
+
+.tc-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.tc-btn {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid #3b4a54;
+  border-radius: 18px;
+  background: transparent;
+  color: #e9edef;
+  font: inherit;
+  cursor: pointer;
+}
+
+.tc-btn-ok {
+  border-color: var(--tc);
+  background: var(--tc);
+  color: #111b21;
+  font-weight: 600;
+}
+
+.tc-btn:focus-visible {
+  outline: 2px solid var(--ivory);
+  outline-offset: 2px;
+}
+
+/* WhatsApp */
+.wa-chat {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border-radius: 8px;
+  background: #0b141a;
+}
+
+.wa-bubble {
+  position: relative;
+  max-width: 85%;
+  padding: 6px 8px 18px;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.wa-in {
+  justify-self: start;
+  background: #202c33;
+}
+
+.wa-out {
+  justify-self: end;
+  background: #005c4b;
+}
+
+/* que la hora / «borrador» no se encime con un texto corto */
+.wa-bubble {
+  min-width: 110px;
+}
+
+.wa-draft {
+  outline: 1px dashed #25d366;
+  outline-offset: -1px;
+  background: #0d3b33;
+}
+
+.wa-cancel {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+.wa-meta {
+  position: absolute;
+  right: 8px;
+  bottom: 3px;
+  color: #a7b3ba;
+  font-size: 12px;
+}
+
+.wa-ticks {
+  color: #53bdeb;
+}
+
+.wa-con-adjunto {
+  display: grid;
+  gap: 6px;
+  padding: 4px 4px 20px;
+}
+
+.wa-img {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  max-height: 340px;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 6px;
+}
+
+.wa-caption {
+  padding: 0 4px;
+}
+
+.wa-file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 6px;
+  background: rgb(0 0 0 / 0.25);
+}
+
+.wa-file-ext {
+  flex: none;
+  padding: 6px 4px;
+  border-radius: 3px;
+  background: #e9edef;
+  color: #111b21;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.wa-file-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wa-from {
+  display: block;
+  color: #25d366;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.wa-media {
+  color: #8696a0;
+}
+
+.wa-voice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 200px;
+  margin-bottom: 6px;
+  color: #8696a0;
+  font-size: 12px;
+}
+
+.wa-play {
+  color: #e9edef;
+}
+
+.wa-wave {
+  flex: 1 1 auto;
+  height: 14px;
+  background: repeating-linear-gradient(90deg, #8696a0 0 2px, transparent 2px 5px);
+  mask: linear-gradient(transparent 20%, #000 20% 80%, transparent 80%), linear-gradient(90deg, #000, #000);
+  opacity: 0.7;
+}
+
+.wa-transcript {
+  display: block;
+  font-style: italic;
+}
+
+.wa-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wa-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.wa-list .wa-meta {
+  position: static;
+  flex: none;
+}
+
+.wa-list-main {
+  display: grid;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.wa-list-main small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Naranja X */
+.tc-card.tc-naranjax {
+  background: #1b1512;
+}
+
+.tc-naranjax .tc-head {
+  background: var(--tc);
+  color: #fff;
+}
+
+.tc-naranjax .tc-head .tc-logo {
+  color: #fff;
+}
+
+.nx-amount {
+  margin: 2px 0 10px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.nx-rows {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 10px;
+}
+
+.nx-rows > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nx-rows dt {
+  color: #b9a79c;
+}
+
+.nx-rows dd {
+  margin: 0;
+  min-width: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.nx-state {
+  margin: 0 0 10px;
+  color: #b9a79c;
+  font-size: 13px;
+}
+
+.nx-ok {
+  color: #3ddc84;
+}
+
+.nx-bad {
+  color: #ff8a65;
+}
+
+.nx-movs {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 10px 0 0;
+  border-top: 1px solid #3a2a22;
+  list-style: none;
+}
+
+.nx-movs li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nx-in {
+  color: #3ddc84;
+}
+
+/* Movilidad */
+.tc-movilidad .tc-head {
+  background: #1d2733;
+}
+
+.mv-map {
+  position: relative;
+  margin: -10px -12px 10px;
+}
+
+.mv-map iframe {
+  display: block;
+  width: 100%;
+  height: 190px;
+  border: 0;
+  /* Google Maps no tiene modo oscuro embebido: se oscurece sin perder los colores de las líneas */
+  filter: invert(0.88) hue-rotate(180deg) saturate(0.8) brightness(0.95);
+}
+
+.mv-open {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 4px 10px;
+  border-radius: 14px;
+  background: #fff;
+  color: #1a73e8;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.mv-sum {
+  margin: 0;
+}
+
+.mv-opts,
+.mv-arr,
+.mv-places {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mv-opts li,
+.mv-arr li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.mv-line {
+  flex: none;
+  min-width: 38px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--tc);
+  color: #0b1422;
+  font-weight: 700;
+  text-align: center;
+}
+
+.mv-sign {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: #aab4c0;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mv-when {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  font-weight: 600;
+}
+
+.mv-live {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3ddc84;
+}
+
+.mv-places li {
+  display: grid;
+}
+
+.tc-movilidad .tc-status {
+  margin: 8px 0 0;
+}
+
+@media (max-width: 720px) {
+  .tc-card {
+    max-width: 100%;
+  }
+}
+
+/* tarjeta de regla / propuesta de misión: es el secretario mismo, así que va con el sistema de la consola */
+.rg-card {
+  display: grid;
+  gap: var(--sp-3);
+  width: min(100%, 460px);
+  padding: var(--sp-4);
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  background: var(--s1);
+}
+.rg-head {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+}
+.rg-kind {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--wait-soft);
+  color: var(--wait);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.rg-name {
+  color: var(--tx);
+  font-size: 16.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+.rg-old {
+  margin: 0;
+  color: var(--tx-3);
+  text-decoration: line-through;
+  line-height: 1.5;
+}
+.rg-text {
+  margin: 0;
+  color: var(--tx-2);
+  line-height: 1.5;
+}
+.rg-kv {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+.rg-kv > div {
+  display: grid;
+  grid-template-columns: 11ch minmax(0, 1fr);
+  gap: var(--sp-3);
+}
+.rg-kv dt {
+  color: var(--tx-3);
+  font-size: 13.5px;
+}
+.rg-kv dd {
+  margin: 0;
+  color: var(--tx);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.rg-state {
+  margin: 0;
+  color: var(--tx-3);
+  font-size: 13.5px;
+}
+.rg-card[data-ok="true"] {
+  border-color: rgb(95 203 140 / 0.35);
+}
+.rg-card[data-ok="true"] .rg-state {
+  color: var(--ok);
+}
+.rg-card[data-ok="true"] .rg-state::before {
+  content: "✓ ";
+}
+.rg-bad {
+  color: var(--bad) !important;
+}
+@media (max-width: 520px) {
+  .rg-kv > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+}
+
+.wa-vig {
+  margin: 0;
+  color: #d1d7db;
+}
+
+.tc-elegido {
+  color: var(--tc);
+}
+
+/* propuesta de misión: el alcance + la transferencia y los mensajes como los vas a ver */
+.mision-card {
+  display: grid;
+  gap: var(--sp-3);
+  width: min(100%, 460px);
+}
+
+.mision-editar {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+}
+
+.mision-editar textarea {
+  width: 100%;
+  resize: vertical;
+}
+
+/* hora y tildes dentro de la burbuja verde: que se lean (≥ 4.5:1) */
+.wa-out .wa-meta {
+  color: #c4ddd6;
+}
+.wa-out .wa-ticks {
+  color: #8fd8ff;
+}

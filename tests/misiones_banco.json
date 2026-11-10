@@ -1,0 +1,35 @@
+[
+  {
+    "id": "pedir-plata",
+    "pedido": "Encargate de que Berna me transfiera 100 pesos, y cuando llegue agradecele.",
+    "espera": {"prepara": true, "contactos": ["berna"], "esperar_ingreso": true, "pasos_min": 2, "fin": true},
+    "nota": "El caso real que se negó («no puedo pedirle plata a nadie en tu nombre»): es un mensaje + esperar el ingreso."
+  },
+  {
+    "id": "hora-movilidad-wsp",
+    "pedido": "Mañana a las 16 fijate cómo llego a la facu desde el laburo y mandáselo a Berna por WhatsApp.",
+    "espera": {"prepara": true, "contactos": ["berna"], "empezar_a": true, "pasos_min": 2, "acciones": ["lectura", "mensaje"]}
+  },
+  {
+    "id": "quedar-con-condicion",
+    "pedido": "Hablale a Berna y quedá para tomar algo el sábado después de las 19. Si propone otro día, consultame.",
+    "espera": {"prepara": true, "contactos": ["berna"], "consultar": true, "pasos_min": 2, "fin": true}
+  },
+  {
+    "id": "solo-si",
+    "pedido": "Mañana a las 18 avisale a Berna que llego tarde, pero solo si hasta esa hora no le escribí yo.",
+    "espera": {"prepara": true, "contactos": ["berna"], "empezar_a": true, "condicion": true}
+  },
+  {
+    "id": "recordatorio-rama",
+    "pedido": "Preguntale a Berna si ya pagó la luz; si dice que no, recordáselo mañana a las 10.",
+    "espera": {"prepara": true, "contactos": ["berna"], "pasos_min": 2, "fin": true}
+  },
+  {
+    "id": "plata-a-la-hora",
+    "pedido": "A las 23:50 pasale 10 centavos a palta.camote.mp y mandale el comprobante a Berna.",
+    "espera": {"prepara_o_preview": true, "contactos": ["berna"]},
+    "necesita_celu": true,
+    "nota": "Necesita un preview real de Naranja X (el celu): sin celu, alcanza con que intente el preview y no se niegue."
+  }
+]

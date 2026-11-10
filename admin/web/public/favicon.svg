@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">
+  <!-- no-phone: prompt «>» marfil + caret ámbar, como el wordmark -->
+  <rect width="16" height="16" fill="#000"/>
+  <g fill="#e6e2d6">
+    <rect x="2" y="3" width="2" height="2"/>
+    <rect x="4" y="5" width="2" height="2"/>
+    <rect x="6" y="7" width="2" height="2"/>
+    <rect x="4" y="9" width="2" height="2"/>
+    <rect x="2" y="11" width="2" height="2"/>
+  </g>
+  <rect x="10" y="3" width="4" height="10" fill="#ffb000"/>
+</svg>
