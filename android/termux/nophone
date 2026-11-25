@@ -1,0 +1,127 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# no-phone en este celu: `nophone` (botón: alterna) / `nophone on` / `nophone off` / `nophone estado`.
+# El botón «no-phone» de Termux:Widget llama `nophone boton`.
+#
+# APAGADO = sin túnel al VPS y sin adb por red (el puerto 5555 queda cerrado con `adb usb`). Desde afuera no hay
+# por dónde entrar: para volver a prenderlo hace falta este celu en la mano (botón + «Depuración inalámbrica»,
+# que solo se activa tocando la pantalla).
+export PATH="$HOME/bin:$PATH"  # el widget corre sin .bashrc: sin esto no encuentra tunel-np
+ON=$HOME/.nophone-on
+L=127.0.0.1:5555
+ESPERA=180  # segundos para activar la depuración inalámbrica
+
+V=$'\e[1;32m'; R=$'\e[1;31m'; A=$'\e[1;33m'; N=$'\e[0m'; B=$'\e[1m'
+
+abierto() { (exec 3<>/dev/tcp/127.0.0.1/"$1") 2>/dev/null; }
+adb_l() { adb connect "$L" >/dev/null 2>&1; adb -s "$L" "$@"; }
+tunel_ok() { tunel-np status 2>/dev/null | head -1 | grep -q corriendo; }
+
+cartel_prendido() {
+  echo
+  echo "  ${V}●  no-phone PRENDIDO${N}"
+  echo "     el VPS puede manejar este celu"
+  echo
+}
+cartel_apagado() {
+  echo
+  echo "  ${R}■  no-phone APAGADO${N}"
+  echo "     nadie puede entrar desde afuera"
+  echo
+}
+
+apagar() {
+  echo "Apagando…"
+  rm -f "$ON"
+  tunel-np stop >/dev/null 2>&1
+  if abierto 5555; then
+    adb_l shell settings put global adb_wifi_enabled 0 >/dev/null 2>&1
+    adb_l usb >/dev/null 2>&1
+  fi
+  adb kill-server >/dev/null 2>&1
+  for _ in 1 2 3 4 5 6; do abierto 5555 || break; sleep 1; done
+  if abierto 5555; then
+    echo "${A}OJO: el puerto 5555 sigue abierto.${N} Apagá «Depuración USB» en Opciones de desarrollador."
+    return 1
+  fi
+  cartel_apagado
+}
+
+reabrir_5555() {
+  # adbd en USB: se reabre el 5555 por «Depuración inalámbrica» (puerto TLS en service.adb.tls.port).
+  echo "${B}Falta un paso tuyo:${N}"
+  echo "  1. Conectate a un WiFi."
+  echo "  2. Bajá la cortina y tocá ${B}«Depuración inalámbrica»${N} (primer botón)."
+  echo "     Si pregunta «¿Permitir en esta red?», tocá ${B}Permitir${N}."
+  echo "  3. Volvé acá: sigo solo."
+  echo
+  local t=0 p avisado_par=0
+  while [ $t -lt $ESPERA ]; do
+    p=$(getprop service.adb.tls.port)
+    if [ -n "$p" ] && [ "$p" != 0 ] && abierto "$p"; then
+      printf '\r%-60s\n' "✓ Depuración inalámbrica activa. Conectando…"
+      adb connect "127.0.0.1:$p" >/dev/null 2>&1
+      if [ "$(adb -s "127.0.0.1:$p" get-state 2>/dev/null)" = device ]; then
+        adb -s "127.0.0.1:$p" tcpip 5555 >/dev/null 2>&1
+        for _ in $(seq 1 10); do abierto 5555 && break; sleep 1; done
+        adb disconnect "127.0.0.1:$p" >/dev/null 2>&1
+        abierto 5555 && return 0
+      elif [ $avisado_par = 0 ]; then
+        avisado_par=1
+        echo "${A}La depuración inalámbrica no reconoce a Termux todavía (falta emparejar, una sola vez).${N}"
+        echo "  Mantené apretado el botón «Depuración inalámbrica» → «Vincular con código»"
+        echo "  y, en otra ventana de Termux:  adb pair 127.0.0.1:<puerto> <código>"
+      fi
+    else
+      printf '\r  esperando la depuración inalámbrica… %3ss ' $((ESPERA - t))
+    fi
+    sleep 2; t=$((t + 2))
+  done
+  echo
+  return 1
+}
+
+prender() {
+  if ! abierto 5555 && ! reabrir_5555; then
+    echo "${R}No se prendió.${N} No apareció la depuración inalámbrica en 3 minutos."
+    echo "  · ¿WiFi conectado? Sin WiFi no arranca."
+    echo "  · Si el botón ya estaba prendido, apagalo y prendelo de nuevo."
+    cartel_apagado
+    return 1
+  fi
+  # La depuración inalámbrica solo hacía falta para reabrir el 5555.
+  adb_l shell settings put global adb_wifi_enabled 0 >/dev/null 2>&1
+  touch "$ON"
+  tunel-np >/dev/null
+  sleep 3
+  if tunel_ok; then
+    cartel_prendido
+  else
+    echo "${A}Prendido, pero el túnel no arrancó.${N} Mirá ~/.tunel-np.log"
+    return 1
+  fi
+}
+
+estado() {
+  if [ -f "$ON" ] && tunel_ok; then cartel_prendido
+  elif [ -f "$ON" ]; then echo; echo "  ${A}●  PRENDIDO, pero el túnel está frenado${N}"; echo "     (tocá el botón para reintentar)"; echo
+  else cartel_apagado
+  fi
+}
+
+boton() {
+  if [ -f "$ON" ] && tunel_ok; then
+    cartel_prendido
+    read -r -p "  Enter = ${B}APAGAR${N}   ·   cerrá la ventana = dejarlo prendido " _ && apagar
+  else
+    prender
+  fi
+  read -r -t 15 -p "  (se cierra sola) " _ || true
+}
+
+case "$1" in
+  on) prender ;;
+  off) apagar ;;
+  estado) estado ;;
+  boton|"") boton ;;
+  *) echo "uso: nophone [on|off|estado]"; exit 2 ;;
+esac

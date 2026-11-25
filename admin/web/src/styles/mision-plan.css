@@ -1,0 +1,210 @@
+/* Propuesta de misión (MisionPlan.tsx): plan, cómo se comunica, cuándo termina, ensayo. Es el secretario mismo:
+   sistema de la consola (superficies, Atkinson para leer, estados con texto), no colores de otra app. */
+.mp {
+  display: grid;
+  gap: var(--sp-3);
+}
+
+.mp-t {
+  margin: 0 0 var(--sp-2);
+  color: var(--tx-2);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mp-pasos {
+  display: grid;
+  gap: var(--sp-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mp-paso {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: var(--sp-2);
+  align-items: start;
+}
+
+.mp-ico {
+  display: flex;
+  justify-content: center;
+  padding-top: 2px;
+}
+
+.mp-cuerpo {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding-bottom: var(--sp-2);
+  border-bottom: 1px solid var(--line-1, rgb(255 255 255 / 0.06));
+  line-height: 1.4;
+}
+
+.mp-cuando {
+  color: var(--tx-2);
+  font-size: 13px;
+}
+
+.mp-hacer {
+  font-weight: 600;
+}
+
+.mp-si {
+  color: #f7d070;
+  font-size: 13px;
+}
+
+.mp-canal {
+  color: var(--tx-2);
+  font-size: 13px;
+}
+
+.mp-texto {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgb(37 211 102 / 0.12);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.mp-lista,
+.mp-fin {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0 0 0 1.1em;
+  line-height: 1.4;
+}
+
+.mp-fin {
+  padding: 0;
+  list-style: none;
+}
+
+.mp-ok {
+  color: #7ee2a8;
+}
+
+.mp-mal {
+  color: #f19ca8;
+}
+
+.mp-vence {
+  color: var(--tx-2);
+}
+
+/* ensayo */
+.me {
+  display: grid;
+  gap: var(--sp-2);
+  padding-top: var(--sp-2);
+  border-top: 1px solid var(--line-2, rgb(255 255 255 / 0.1));
+}
+
+.me-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+}
+
+.me-head .mp-t {
+  margin: 0;
+}
+
+.me-nota {
+  margin: 0;
+  color: var(--tx-2);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.me-error {
+  color: #f19ca8;
+}
+
+.me-rama {
+  border: 1px solid var(--line-2, rgb(255 255 255 / 0.1));
+  border-radius: 10px;
+}
+
+.me-rama > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 44px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.me-final {
+  font-size: 13px;
+}
+
+.me-cumplida {
+  color: #7ee2a8;
+}
+
+.me-fracaso {
+  color: #f19ca8;
+}
+
+.me-consultar {
+  color: #f7d070;
+}
+
+.me-turnos {
+  display: grid;
+  gap: var(--sp-2);
+  margin: 0;
+  padding: 0 12px 10px 2em;
+  line-height: 1.4;
+}
+
+.me-turnos ul {
+  margin: 2px 0 0;
+  padding-left: 1em;
+}
+
+.me-ev {
+  color: var(--tx-2);
+  font-size: 13px;
+}
+
+.me-msg {
+  overflow-wrap: anywhere;
+}
+
+.me-tool {
+  color: var(--tx-2);
+}
+
+.me-aviso {
+  margin: 0;
+  padding: 0 12px 10px;
+  color: #f7d070;
+  font-size: 13px;
+}
+
+/* el mensaje exacto, dentro de su paso, con «corregir» al lado */
+.mp-msg {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+  margin-top: 4px;
+}
+
+.mp-msg .wa-bubble {
+  max-width: 100%;
+  margin-left: 0;
+}
+
+.mp-msg .mision-editar {
+  width: 100%;
+}

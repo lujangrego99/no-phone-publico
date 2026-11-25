@@ -1,0 +1,51 @@
+# Publica la demo de la consola (datos ficticios, sin servidor) en GitHub Pages.
+name: demo
+
+on:
+  push:
+    branches: [main]
+    paths: ["admin/**", ".github/workflows/demo.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: admin/package-lock.json
+      - run: npm ci
+        working-directory: admin
+      - name: build demo
+        working-directory: admin
+        env:
+          VITE_DEMO: "1"
+          VITE_BASE: /${{ github.event.repository.name }}/
+        run: |
+          npx vite build --outDir ../dist-demo
+          cp dist-demo/index.html dist-demo/404.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: admin/dist-demo
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

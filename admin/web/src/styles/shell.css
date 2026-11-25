@@ -1,0 +1,495 @@
+.skip:focus {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+  width: auto;
+  height: auto;
+  clip-path: none;
+  padding: 6px 12px;
+  background: var(--signal);
+  color: var(--void);
+}
+
+/* ---------- pulso ---------- */
+.pulse {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+  gap: calc(var(--u) * 6);
+  align-items: start;
+}
+
+.pulse-queue {
+  display: grid;
+  gap: calc(var(--u) * 1.5);
+  min-width: 0;
+}
+
+.pulse-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--u) 2ch;
+}
+
+.pulse-checked {
+  margin-top: calc(var(--u) * -1);
+  margin-bottom: var(--u);
+}
+
+.pulse-fine {
+  display: grid;
+  gap: 4px;
+  margin-top: calc(var(--u) * 3);
+}
+
+.pulse-fine > h2 {
+  font-size: var(--s-body);
+}
+
+.pulse-side {
+  position: sticky;
+  top: calc(var(--u) * 8);
+  display: grid;
+  gap: calc(var(--u) * 2);
+}
+
+.tally {
+  display: grid;
+  gap: var(--u);
+  margin: 0;
+}
+
+.tally > div {
+  display: grid;
+  gap: 2px;
+}
+
+.tally dd {
+  margin: 0;
+  color: var(--b2);
+}
+
+@media (hover: hover) {
+  .tally a:hover {
+    color: var(--signal);
+  }
+}
+
+.side-title {
+  margin-top: var(--u);
+}
+
+.feed {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.feed li {
+  display: grid;
+  grid-template-columns: 11ch minmax(0, 1fr);
+  column-gap: 1ch;
+}
+
+.feed time {
+  color: var(--frost);
+  letter-spacing: 0;
+}
+
+.feed-who {
+  grid-column: 2;
+  color: var(--frost);
+}
+
+.feed-text {
+  grid-column: 2;
+}
+
+@media (max-width: 960px) {
+  .pulse {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pulse-side {
+    position: static;
+  }
+}
+
+.filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--u) calc(var(--u) * 3);
+  margin-bottom: calc(var(--u) * 2);
+}
+
+.filter .field {
+  flex: 1 1 260px;
+  max-width: 420px;
+}
+
+.planes {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.plane-back,
+.plane-front {
+  grid-area: 1 / 1;
+  min-width: 0;
+}
+
+.plane-back[data-recede="true"] {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Jalar hacia adelante: el plano entra desde la línea elegida, ya en primer plano. */
+.plane-front {
+  z-index: 2;
+  align-self: start;
+  display: grid;
+  gap: var(--u);
+  width: min(100%, 860px);
+  margin-left: auto;
+  padding: calc(var(--u) * 2) calc(var(--u) * 3) calc(var(--u) * 3);
+  background: var(--void);
+  animation: pull 260ms var(--ease) both;
+}
+
+@keyframes pull {
+  from {
+    opacity: 0;
+    transform: translateX(-12px) scale(0.98);
+  }
+}
+
+.plane-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.plane-title {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .plane-front {
+    padding: var(--u) var(--u) calc(var(--u) * 2);
+  }
+}
+
+/* ---------- memoria: red ---------- */
+.red-explica {
+  max-width: 80ch;
+  margin-bottom: var(--u);
+}
+
+.red-camino {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 1ch;
+  margin-bottom: var(--u);
+}
+
+.red-camino-paso {
+  display: inline-flex;
+  align-items: center;
+  gap: 1ch;
+}
+
+.red-camino-btn {
+  min-height: 33px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--frost);
+  font: inherit;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .red-camino-btn:hover {
+    color: var(--ivory);
+  }
+}
+
+.red-camino-aca {
+  color: var(--ivory);
+}
+
+.red-caja {
+  position: relative;
+  margin: var(--u) 0 calc(var(--u) * 3);
+  overflow: hidden;
+}
+
+.red-lineas {
+  position: absolute;
+  inset: 0;
+}
+
+.red-lineas line {
+  stroke: var(--ash);
+  transition: stroke 160ms var(--ease);
+}
+
+.red-lineas line[data-tipo="vieja"] {
+  stroke: var(--dust);
+}
+
+.red-lineas line[data-tipo="reciente"] {
+  stroke: var(--frost);
+}
+
+.red-lineas line[data-tipo="foco"] {
+  stroke: var(--ivory);
+}
+
+/* El nombre tapa la punta de la línea con el vacío: la línea llega a la palabra, no a un círculo. */
+.red-nodo {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  max-width: 22ch;
+  min-height: 33px;
+  padding: 0 0.8ch;
+  border: 0;
+  background: var(--void);
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* Sin cambio de tracking al resaltar: el ancho se mide en píxeles enteros y se cortaría el nombre. */
+.red-nodo[data-depth] {
+  letter-spacing: var(--t1);
+  transition: color 160ms var(--ease);
+}
+
+.red-nombre {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.red-marca {
+  flex: none;
+  width: 2ch;
+  color: var(--dust);
+}
+
+.red-nodo[data-depth="2"] .red-marca,
+.red-nodo[data-depth="3"] .red-marca {
+  color: var(--ivory);
+}
+
+.red-centro {
+  z-index: 1;
+  max-width: 40ch;
+  font-size: var(--s-line);
+  line-height: calc(var(--u) * 3);
+}
+
+.red-nodo.red-centro .red-marca {
+  color: var(--signal);
+}
+
+.red-nodo:focus-visible {
+  outline: 1px solid var(--ivory);
+  outline-offset: 2px;
+}
+
+.red-ocultos {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .red-nodo {
+    max-width: 14ch;
+    padding: 0 0.4ch;
+  }
+  .red-centro {
+    max-width: 16ch;
+    font-size: var(--s-body);
+  }
+}
+
+.device-new,
+.inline-form {
+  display: grid;
+  gap: calc(var(--u) * 1.5);
+  max-width: 900px;
+  margin-bottom: calc(var(--u) * 3);
+}
+
+.plane-card,
+.device-new {
+  padding: calc(var(--u) * 2) 0;
+}
+
+.soon .meta {
+  margin-left: 1ch;
+}
+
+@media (max-width: 720px) {
+  .device-profile,
+  .device-controls,
+  .device-secret {
+    padding-left: 0;
+  }
+}
+
+/* ---------- tareas ---------- */
+.job-detail {
+  display: grid;
+  gap: 2px;
+}
+
+.job-prompt {
+  color: var(--b1);
+  overflow-wrap: anywhere;
+}
+
+.job-error {
+  color: var(--ivory);
+}
+
+/* Un campo no se estira para igualar a su vecino de fila. */
+.field {
+  align-content: start;
+}
+
+.choice label.soon {
+  color: var(--frost);
+}
+
+.plane-fix {
+  display: grid;
+  gap: var(--u);
+  max-width: 64ch;
+  margin-top: var(--u);
+}
+
+/* ---------- whatsapp ---------- */
+.wa {
+  display: grid;
+  gap: calc(var(--u) * 2);
+}
+
+.wa-pair {
+  display: grid;
+  gap: calc(var(--u) * 1.5);
+}
+
+.wa-qr-row,
+.wa-code-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: calc(var(--u) * 2) calc(var(--u) * 4);
+}
+
+/* El QR es la única superficie clara: una celda invertida grande, nítida como los glifos. */
+.wa-qr {
+  display: block;
+  width: 264px;
+  height: 264px;
+  background: #fff;
+  image-rendering: pixelated;
+  animation: pull 260ms var(--ease) both;
+}
+
+.wa-steps {
+  display: grid;
+  gap: 6px;
+  max-width: 44ch;
+  margin: 0;
+  padding: 0 0 0 3ch;
+  color: var(--b2);
+}
+
+.wa-steps li::marker {
+  color: var(--frost);
+}
+
+.wa-code {
+  flex: 1 1 100%;
+  color: var(--ivory);
+  letter-spacing: 0.2em;
+}
+
+.wa-phone {
+  display: grid;
+  gap: var(--u);
+  max-width: 420px;
+}
+
+.wa-wait {
+  color: var(--b2);
+  min-height: 33px;
+}
+
+.wa-bridge {
+  display: grid;
+  gap: var(--u);
+  max-width: 900px;
+}
+
+.wa-bridge-line {
+  margin-top: calc(var(--u) * -1);
+}
+
+.wa-facts {
+  padding-left: 0;
+}
+
+.plane-fix.wide {
+  max-width: none;
+}
+
+.vigilancias {
+  display: grid;
+  gap: var(--u);
+  margin-bottom: calc(var(--u) * 4);
+}
+
+.tareas-sub {
+  margin-bottom: var(--u);
+}
+
+/* misiones: lo que hizo, plegado */
+.mision-log summary {
+  cursor: pointer;
+  color: var(--b1);
+}
+
+.mision-log ol {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+}
+
+.misiones {
+  margin-bottom: calc(var(--lh) * 2);
+}
+
+/* misiones: el título largo se corta en vez de empujar la fila fuera de la pantalla */
+.misiones .queue {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.misiones .qline-detail span,
+.mision-log li {
+  overflow-wrap: anywhere;
+}

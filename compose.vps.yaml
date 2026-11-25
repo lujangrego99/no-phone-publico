@@ -1,0 +1,77 @@
+# no-phone en un VPS (sin celu enchufado): el celu se conecta solo, por la APK, al servicio `agente`.
+#
+#   docker compose -f compose.yaml -f compose.vps.yaml up -d
+#
+# - Sin adb: los perfiles de celu usan serial «apk:<id>» (phones.json) y van por el hub de agentes.
+# - `agente` es lo único que publica el compose: el Traefik de Easypanel lo publica con TLS en AGENTE_HOST (red `easypanel`).
+#   La consola, la API y el resto siguen en 127.0.0.1 del VPS. La consola además se publica desde
+#   Easypanel (dominio con basicAuth de Traefik delante, p. ej. app.no-phone.online) → cookie solo HTTPS.
+# - .env del VPS: APP_ADB_MODE=apk, AGENTE_CTL_TOKEN, AGENTE_HOST.
+# - Alta de un celu: docker compose exec agente python agente_hub.py alta redmi7  → token para la APK.
+x-agente-env: &agente-env
+  AGENTE_HUB_URL: ws://agente:8766
+  AGENTE_CTL_TOKEN: ${AGENTE_CTL_TOKEN:?falta AGENTE_CTL_TOKEN en .env}
+
+services:
+  adb:
+    profiles: ["nunca"]
+
+  agente:
+    image: no-phone-app:latest
+    env_file: .env
+    restart: unless-stopped
+    command: ["python", "agente_hub.py"]
+    environment:
+      ADB_MODE: apk
+      AGENTE_DIR: /data/agente
+      AGENTE_ADB_VECINO: hindsight
+      AGENTE_CTL_TOKEN: ${AGENTE_CTL_TOKEN}
+      TZ: ${TZ:-America/Argentina/Mendoza}
+    volumes:
+      - app-data:/data
+    networks: [default, easypanel]
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: easypanel
+      traefik.http.routers.nophone-agente.rule: Host(`${AGENTE_HOST:?falta AGENTE_HOST}`)
+      traefik.http.routers.nophone-agente.entrypoints: https
+      traefik.http.routers.nophone-agente.tls.certresolver: letsencrypt
+      traefik.http.services.nophone-agente.loadbalancer.server.port: "8765"
+
+  # Celus por túnel SSH (Termux → usuario celu12t del VPS, solo 172.19.0.1:15555 = gateway de la red
+  # no-phone_default): adb server propio que hace `adb connect` a ese puerto. El perfil del celu lleva
+  # adb_server «adb-tunel:5037» (phones.py); el adb server global sigue siendo el puente de casa.
+  adb-tunel:
+    image: no-phone-app:latest
+    restart: unless-stopped
+    user: "0:0"
+    entrypoint: ["/usr/bin/tini", "--"]
+    command: ["/app/docker/adb-server.sh"]
+    environment:
+      ADB_MODE: connect
+      ADB_CONNECT: ${ADB_TUNEL:-172.19.0.1:15555}
+    volumes:
+      - adb-keys:/root/.android
+    healthcheck:
+      test: ["CMD", "adb", "devices"]
+      interval: 30s
+      timeout: 10s
+
+  nophone-api:
+    depends_on: !override [agente]
+    environment:
+      <<: *agente-env
+
+  nophone-mcp:
+    depends_on: !override [agente]
+    environment:
+      <<: *agente-env
+
+  admin:
+    environment:
+      <<: *agente-env
+      ADMIN_SECURE_COOKIE: "1"
+
+networks:
+  easypanel:
+    external: true
